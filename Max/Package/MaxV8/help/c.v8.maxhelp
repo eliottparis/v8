@@ -9,7 +9,7 @@
 			"modernui" : 1
 		}
 ,
-		"rect" : [ 399.0, 221.0, 296.0, 408.0 ],
+		"rect" : [ 399.0, 221.0, 384.0, 408.0 ],
 		"bglocked" : 0,
 		"openinpresentation" : 0,
 		"default_fontsize" : 12.0,
@@ -37,6 +37,45 @@
 		"style" : "",
 		"subpatcher_template" : "",
 		"boxes" : [ 			{
+				"box" : 				{
+					"id" : "obj-14",
+					"maxclass" : "message",
+					"numinlets" : 2,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 171.0, 344.0, 119.0, 23.0 ],
+					"style" : "",
+					"text" : "ZOZA 7.8 666."
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-13",
+					"maxclass" : "message",
+					"numinlets" : 2,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 186.0, 227.0, 142.0, 23.0 ],
+					"style" : "",
+					"text" : "testout 7.8 ZOZA 666"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-12",
+					"maxclass" : "message",
+					"numinlets" : 2,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 209.0, 297.0, 119.0, 23.0 ],
+					"style" : "",
+					"text" : "7.8 ZOZA 666."
+				}
+
+			}
+, 			{
 				"box" : 				{
 					"id" : "obj-10",
 					"maxclass" : "message",
@@ -91,17 +130,17 @@
 				"box" : 				{
 					"id" : "obj-22",
 					"maxclass" : "newobj",
-					"numinlets" : 1,
-					"numoutlets" : 1,
-					"outlettype" : [ "" ],
-					"patching_rect" : [ 41.5, 344.0, 75.0, 23.0 ],
+					"numinlets" : 3,
+					"numoutlets" : 3,
+					"outlettype" : [ "", "", "" ],
+					"patching_rect" : [ 41.5, 344.0, 63.0, 23.0 ],
 					"saved_object_attributes" : 					{
-						"filename" : "testlib.js",
+						"filename" : "test.js",
 						"parameter_enable" : 0
 					}
 ,
 					"style" : "",
-					"text" : "js testlib.js"
+					"text" : "js test.js"
 				}
 
 			}
@@ -227,11 +266,11 @@
 					"id" : "obj-6",
 					"maxclass" : "newobj",
 					"numinlets" : 4,
-					"numoutlets" : 2,
-					"outlettype" : [ "", "" ],
-					"patching_rect" : [ 76.0, 242.0, 78.0, 23.0 ],
+					"numoutlets" : 3,
+					"outlettype" : [ "", "", "" ],
+					"patching_rect" : [ 76.0, 242.0, 160.0, 23.0 ],
 					"style" : "",
-					"text" : "c.v8 test.js"
+					"text" : "c.v8 test.js 33.1 90 zozo"
 				}
 
 			}
@@ -251,6 +290,15 @@
 					"disabled" : 0,
 					"hidden" : 0,
 					"source" : [ "obj-10", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-6", 0 ],
+					"disabled" : 0,
+					"hidden" : 0,
+					"source" : [ "obj-13", 0 ]
 				}
 
 			}
@@ -319,6 +367,12 @@
 			}
  ],
 		"dependency_cache" : [ 			{
+				"name" : "test.js",
+				"bootpath" : "~/Dev/Perso/v8Lab/Max/Package/MaxV8/javascript",
+				"type" : "TEXT",
+				"implicit" : 1
+			}
+, 			{
 				"name" : "c.v8.mxo",
 				"type" : "iLaX"
 			}
