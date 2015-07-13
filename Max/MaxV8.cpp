@@ -108,29 +108,26 @@ namespace cicm
         // Create a template for the global object.
         Local<v8::ObjectTemplate> global = v8::ObjectTemplate::New(isolate);
         
-        // Bind the global 'post' function to the C++ post callback.
-        global->Set(v8::String::NewFromUtf8(isolate, "post"),
-                    v8::FunctionTemplate::New(isolate, JsPost));
-        
-        // Bind the global 'object_post' function to the C++ post callback.
-        global->Set(v8::String::NewFromUtf8(isolate, "object_post"),
-                    v8::FunctionTemplate::New(isolate, JsObjectPost));
-        
-        // Bind the global 'error' function to the C++ error callback.
-        global->Set(v8::String::NewFromUtf8(isolate, "error"),
-                    v8::FunctionTemplate::New(isolate, JsError));
-        
         // Wrap the raw t_object pointer in an External so it can be referenced
         // from within JavaScript.
         Local<External> obj_ptr = External::New(isolate, &obj);
+        
+        // Bind the global 'post' function to the C++ post callback.
+        global->Set(v8::String::NewFromUtf8(isolate, "post"),
+                    v8::FunctionTemplate::New(isolate, JsPost, obj_ptr));
+        
+        // Bind the global 'error' function to the C++ error callback.
+        global->Set(v8::String::NewFromUtf8(isolate, "error"),
+                    v8::FunctionTemplate::New(isolate, JsError, obj_ptr));
+        
         global->SetAccessor(String::NewFromUtf8(isolate, "inlets"), JsInletsGetter, JsInletsSetter, obj_ptr);
         global->SetAccessor(String::NewFromUtf8(isolate, "outlets"), JsOutletsGetter, JsOutletsSetter, obj_ptr);
         
         // jsarguments getter
-        global->SetAccessor(String::NewFromUtf8(isolate, "jsarguments"), JsArgumentsGetter, nullptr, obj_ptr);
+        global->SetAccessor(String::NewFromUtf8(isolate, "jsarguments"), JsArgumentsGetter, nullptr, obj_ptr, ALL_CAN_READ);
         
         // proxy_getinlet wrapper
-        global->SetAccessor(String::NewFromUtf8(isolate, "inlet"), JsProxyInletsGetter, nullptr, obj_ptr);
+        global->SetAccessor(String::NewFromUtf8(isolate, "inlet"), JsProxyInletsGetter, nullptr, obj_ptr, ALL_CAN_READ);
         
         // Bind the global 'outlet' function to the C++ callback.
         global->Set(v8::String::NewFromUtf8(isolate, "outlet"),
@@ -702,9 +699,13 @@ namespace cicm
         return *value ? *value : "<string conversion failed>";
     }
     
-    const char* MaxV8::getPostCString(FunctionCallbackInfo<Value> const& args)
+    void MaxV8::JsPost(FunctionCallbackInfo<Value>const& args)
     {
         Isolate::Scope isolate_scope(args.GetIsolate());
+        
+        Local<External> data = Local<External>::Cast(args.Data());
+        MaxV8* x = static_cast<MaxV8*>(data->Value());
+        
         string postStr;
         for(int i = 0; i < args.Length(); i++)
         {
@@ -722,21 +723,33 @@ namespace cicm
             }
         }
         
-        return postStr.c_str();
-    }
-    
-    void MaxV8::JsPost(FunctionCallbackInfo<Value>const& args)
-    {
-        post(getPostCString(args));
-    }
-    
-    void MaxV8::JsObjectPost(FunctionCallbackInfo<Value>const& args)
-    {
-        post(getPostCString(args));
+        object_post((t_object*)x, postStr.c_str());
     }
     
     void MaxV8::JsError(FunctionCallbackInfo<Value>const& args)
     {
-        error(getPostCString(args));
+        Isolate::Scope isolate_scope(args.GetIsolate());
+        
+        Local<External> data = Local<External>::Cast(args.Data());
+        MaxV8* x = static_cast<MaxV8*>(data->Value());
+        
+        string postStr;
+        for(int i = 0; i < args.Length(); i++)
+        {
+            HandleScope handle_scope(args.GetIsolate());
+            if (i > 0)
+            {
+                postStr.append(" ");
+            }
+            
+            if(!args[i].IsEmpty())
+            {
+                v8::String::Utf8Value str(args[i]);
+                const char* cstr = ToCString(str);
+                postStr.append(cstr);
+            }
+        }
+        
+        object_error((t_object*)x, postStr.c_str());
     }
 }

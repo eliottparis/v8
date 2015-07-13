@@ -29,9 +29,6 @@ namespace cicm
     class MaxV8
     {
     public:
-        MaxV8() noexcept {};
-        ~MaxV8() noexcept {};
-        
         //! Init v8.
         static void Init();
         
@@ -82,7 +79,6 @@ namespace cicm
         
         long        m_obj_argc;
         t_atom*     m_obj_argv;
-        void*       m_proxy;
         long        m_inletcount;
         char        m_filename[MAX_PATH_CHARS];
         short       m_path;
@@ -134,20 +130,16 @@ namespace cicm
         static void JsSetOutletAssist(const FunctionCallbackInfo<Value>& args);
         
         //! JavaScript 'outlet' function wrapper.
-        static void JsOutput(const FunctionCallbackInfo<Value>& args);
-        
-        //! JavaScript 'post' function wrapper.
-        static void JsPost(const FunctionCallbackInfo<Value>& args);
-        
-        //! JavaScript 'object_post' function wrapper.
-        static void JsObjectPost(const FunctionCallbackInfo<Value>& args);
-        
-        //! JavaScript 'error' function wrapper.
-        static void JsError(const FunctionCallbackInfo<Value>& args);
+        static void JsOutput(FunctionCallbackInfo<Value> const& args);
         
         //! @internal Extracts a C string from a V8 Utf8Value.
-        static const char* ToCString(const String::Utf8Value& value);
-        static const char* getPostCString(const FunctionCallbackInfo<Value>& args);
+        static const char* ToCString(String::Utf8Value const& value);
+        
+        //! JavaScript 'post' function wrapper.
+        static void JsPost(FunctionCallbackInfo<Value> const& args);
+        
+        //! JavaScript 'error' function wrapper.
+        static void JsError(FunctionCallbackInfo<Value> const& args);
         
         //! resize the inlets
         void resizeInlets(MaxV8 *x);
