@@ -9,19 +9,22 @@ void ext_main(void *r)
 {
     using namespace cicm;
     
-    t_class *c = class_new("c.v8", (method)MaxV8::NewInstance, (method)MaxV8::FreeInstance, (long)sizeof(MaxV8), 0L, A_GIMME, 0);
+    t_class *c = class_new("c.v8",
+                           (method)MaxV8::NewInstance,
+                           (method)MaxV8::FreeInstance,
+                           (long)sizeof(MaxV8), 0L, A_GIMME, 0);
     
-    class_addmethod(c, (method)MaxV8::Assist,			"assist",	A_CANT, 0);
-    class_addmethod(c, (method)MaxV8::Loadbang,         "loadbang",	A_CANT, 0);
-    class_addmethod(c, (method)MaxV8::Read,             "compile",  A_DEFSYM, 0);
-    class_addmethod(c, (method)MaxV8::Bang,             "bang",     0, 0);
-    class_addmethod(c, (method)MaxV8::Int,              "int",      A_LONG, 0);
-    class_addmethod(c, (method)MaxV8::Float,            "float",    A_FLOAT, 0);
-    class_addmethod(c, (method)MaxV8::Anything,         "anything",	A_GIMME, 0);
-    class_addmethod(c, (method)MaxV8::OpenEditor,       "dblclick",	A_CANT, 0);
-    class_addmethod(c, (method)MaxV8::OpenEditor,       "open",     0, 0);
-    class_addmethod(c, (method)MaxV8::EditorClosed,		"edclose",	A_CANT, 0);
-    class_addmethod(c, (method)MaxV8::EditorSaved,      "edsave",   A_CANT, 0);
+    class_addmethod(c, (method)MaxV8::Assist,           "assist",   	A_CANT,     0);
+    class_addmethod(c, (method)MaxV8::Loadbang,         "loadbang",     A_CANT,     0);
+    class_addmethod(c, (method)MaxV8::Read,             "compile",      A_DEFSYM,   0);
+    class_addmethod(c, (method)MaxV8::Bang,             "bang",         0,          0);
+    class_addmethod(c, (method)MaxV8::Int,              "int",          A_LONG,     0);
+    class_addmethod(c, (method)MaxV8::Float,            "float",        A_FLOAT,    0);
+    class_addmethod(c, (method)MaxV8::Anything,         "anything",     A_GIMME,    0);
+    class_addmethod(c, (method)MaxV8::OpenEditor,       "dblclick",     A_CANT,     0);
+    class_addmethod(c, (method)MaxV8::OpenEditor,       "open",         0,          0);
+    class_addmethod(c, (method)MaxV8::EditorClosed,     "edclose",      A_CANT,     0);
+    class_addmethod(c, (method)MaxV8::EditorSaved,      "edsave",       A_CANT,     0);
     
     class_register(CLASS_BOX, c);
     MaxV8::obj_class = c;
