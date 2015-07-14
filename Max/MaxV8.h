@@ -77,40 +77,50 @@ namespace cicm
         
     private:
         
-        long        m_obj_argc;
-        t_atom*     m_obj_argv;
-        long        m_inletcount;
-        char        m_filename[MAX_PATH_CHARS];
-        short       m_path;
-        t_handle	m_text;
-        long		m_textsize;
-        t_object*   m_texteditor;
+        long                m_obj_argc;
+        t_atom*             m_obj_argv;
+        long                m_inletcount;
+        char                m_filename[MAX_PATH_CHARS];
+        short               m_path;
+        t_handle            m_text;
+        long                m_textsize;
+        t_object*           m_texteditor;
+        vector<void*>       m_outlets;
         
-        vector<void*> m_outlets;
-        
-        int m_number_of_inlets;
-        int m_number_of_outlets;
-        map<int, string> m_inlet_assist;
-        map<int, string> m_outlet_assist;
+        int                 m_number_of_inlets;
+        int                 m_number_of_outlets;
+        map<int, string>    m_inlet_assist;
+        map<int, string>    m_outlet_assist;
         
         static v8::Platform *v8_platform;
-        v8::Isolate* m_isolate;
-        v8::Persistent<v8::Context> m_js_context;
+        v8::Isolate*        m_isolate;
+        v8::Persistent
+        <v8::Context>       m_js_context;
+        v8::Persistent
+        <v8::String>        m_script;
         
         //---------------------------------------------
         
-        bool InitInstance(Isolate* isolate, long argc, t_atom* argv);
+        bool initInstance(Isolate* isolate, long argc, t_atom* argv);
         
         static void DoRead(MaxV8* x, t_symbol *s, long argc, t_atom *argv);
         
         // Creates a new execution environment containing the Max wrapped functions.
-        Local<Context> CreateMaxContext(Isolate* isolate);
+        Local<Context> createMaxContext(Isolate* isolate);
         
         //! Search the file in Max search path, and read the content into a v8 string.
-        Local<v8::String> ReadFile(const char* file);
-        Local<Value> ExecuteScript(Local<v8::String> script);
+        Local<v8::String> readFile(const char* file);
         
-        static void CallJsFunction(MaxV8* x, t_symbol *s, long ac, t_atom *av);
+        //! Compile and run the given script
+        Local<Value> compileAndRunScript(Isolate* isolate, Local<v8::String> script);
+        
+        //! resize the inlets
+        void resizeInlets(MaxV8 *x);
+        //! resize the outlets
+        void resizeOutlets(MaxV8 *x);
+        
+        //! call a named JavaScript function with arguments
+        static Local<Value> CallJsFunction(MaxV8* x, t_symbol *s, long ac, t_atom *av);
         
         //------------------------------------------------------------------------
         // v8 static handles
@@ -140,11 +150,6 @@ namespace cicm
         
         //! JavaScript 'error' function wrapper.
         static void JsError(FunctionCallbackInfo<Value> const& args);
-        
-        //! resize the inlets
-        void resizeInlets(MaxV8 *x);
-        //! resize the outlets
-        void resizeOutlets(MaxV8 *x);
     };
 }
 

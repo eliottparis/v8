@@ -1,0 +1,273 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		2C880B351B554F920094B85F /* MaxV8.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 2C880B341B554F920094B85F /* MaxV8.xcconfig */; };
+		2C880B371B5557A10094B85F /* v8js.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C880B361B5557A10094B85F /* v8js.cpp */; };
+		2C880B3A1B55597C0094B85F /* MaxV8.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C880B381B55597C0094B85F /* MaxV8.cpp */; };
+		2C880B3B1B55597C0094B85F /* MaxV8.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C880B391B55597C0094B85F /* MaxV8.h */; };
+		2C880B591B5565D30094B85F /* libgmock.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C880B501B5565D30094B85F /* libgmock.a */; };
+		2C880B5A1B5565D30094B85F /* libgtest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C880B511B5565D30094B85F /* libgtest.a */; };
+		2C880B5B1B5565D30094B85F /* libicudata.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C880B521B5565D30094B85F /* libicudata.a */; };
+		2C880B5C1B5565D30094B85F /* libicui18n.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C880B531B5565D30094B85F /* libicui18n.a */; };
+		2C880B5D1B5565D30094B85F /* libicuuc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C880B541B5565D30094B85F /* libicuuc.a */; };
+		2C880B5E1B5565D30094B85F /* libv8_base.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C880B551B5565D30094B85F /* libv8_base.a */; };
+		2C880B5F1B5565D30094B85F /* libv8_libbase.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C880B561B5565D30094B85F /* libv8_libbase.a */; };
+		2C880B601B5565D30094B85F /* libv8_libplatform.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C880B571B5565D30094B85F /* libv8_libplatform.a */; };
+		2C880B611B5565D30094B85F /* libv8_nosnapshot.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C880B581B5565D30094B85F /* libv8_nosnapshot.a */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		2C880B341B554F920094B85F /* MaxV8.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = MaxV8.xcconfig; sourceTree = "<group>"; };
+		2C880B361B5557A10094B85F /* v8js.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = v8js.cpp; sourceTree = "<group>"; };
+		2C880B381B55597C0094B85F /* MaxV8.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MaxV8.cpp; sourceTree = "<group>"; };
+		2C880B391B55597C0094B85F /* MaxV8.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MaxV8.h; sourceTree = "<group>"; };
+		2C880B501B5565D30094B85F /* libgmock.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgmock.a; path = ../ThirdParty/v8/out/native/libgmock.a; sourceTree = "<group>"; };
+		2C880B511B5565D30094B85F /* libgtest.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgtest.a; path = ../ThirdParty/v8/out/native/libgtest.a; sourceTree = "<group>"; };
+		2C880B521B5565D30094B85F /* libicudata.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicudata.a; path = ../ThirdParty/v8/out/native/libicudata.a; sourceTree = "<group>"; };
+		2C880B531B5565D30094B85F /* libicui18n.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicui18n.a; path = ../ThirdParty/v8/out/native/libicui18n.a; sourceTree = "<group>"; };
+		2C880B541B5565D30094B85F /* libicuuc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicuuc.a; path = ../ThirdParty/v8/out/native/libicuuc.a; sourceTree = "<group>"; };
+		2C880B551B5565D30094B85F /* libv8_base.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libv8_base.a; path = ../ThirdParty/v8/out/native/libv8_base.a; sourceTree = "<group>"; };
+		2C880B561B5565D30094B85F /* libv8_libbase.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libv8_libbase.a; path = ../ThirdParty/v8/out/native/libv8_libbase.a; sourceTree = "<group>"; };
+		2C880B571B5565D30094B85F /* libv8_libplatform.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libv8_libplatform.a; path = ../ThirdParty/v8/out/native/libv8_libplatform.a; sourceTree = "<group>"; };
+		2C880B581B5565D30094B85F /* libv8_nosnapshot.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libv8_nosnapshot.a; path = ../ThirdParty/v8/out/native/libv8_nosnapshot.a; sourceTree = "<group>"; };
+		2FBBEAE508F335360078DB84 /* v8js.mxo */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = v8js.mxo; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		2FBBEADC08F335360078DB84 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2C880B591B5565D30094B85F /* libgmock.a in Frameworks */,
+				2C880B5A1B5565D30094B85F /* libgtest.a in Frameworks */,
+				2C880B5B1B5565D30094B85F /* libicudata.a in Frameworks */,
+				2C880B5C1B5565D30094B85F /* libicui18n.a in Frameworks */,
+				2C880B5D1B5565D30094B85F /* libicuuc.a in Frameworks */,
+				2C880B5E1B5565D30094B85F /* libv8_base.a in Frameworks */,
+				2C880B5F1B5565D30094B85F /* libv8_libbase.a in Frameworks */,
+				2C880B601B5565D30094B85F /* libv8_libplatform.a in Frameworks */,
+				2C880B611B5565D30094B85F /* libv8_nosnapshot.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		089C166AFE841209C02AAC07 /* iterator */ = {
+			isa = PBXGroup;
+			children = (
+				2C880B4E1B555A940094B85F /* sources */,
+				2C880B4F1B555AAA0094B85F /* Libs */,
+				19C28FB4FE9D528D11CA2CBB /* Products */,
+			);
+			name = iterator;
+			sourceTree = "<group>";
+		};
+		19C28FB4FE9D528D11CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2FBBEAE508F335360078DB84 /* v8js.mxo */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2C880B4E1B555A940094B85F /* sources */ = {
+			isa = PBXGroup;
+			children = (
+				2C880B341B554F920094B85F /* MaxV8.xcconfig */,
+				2C880B361B5557A10094B85F /* v8js.cpp */,
+				2C880B381B55597C0094B85F /* MaxV8.cpp */,
+				2C880B391B55597C0094B85F /* MaxV8.h */,
+			);
+			name = sources;
+			sourceTree = "<group>";
+		};
+		2C880B4F1B555AAA0094B85F /* Libs */ = {
+			isa = PBXGroup;
+			children = (
+				2C880B501B5565D30094B85F /* libgmock.a */,
+				2C880B511B5565D30094B85F /* libgtest.a */,
+				2C880B521B5565D30094B85F /* libicudata.a */,
+				2C880B531B5565D30094B85F /* libicui18n.a */,
+				2C880B541B5565D30094B85F /* libicuuc.a */,
+				2C880B551B5565D30094B85F /* libv8_base.a */,
+				2C880B561B5565D30094B85F /* libv8_libbase.a */,
+				2C880B571B5565D30094B85F /* libv8_libplatform.a */,
+				2C880B581B5565D30094B85F /* libv8_nosnapshot.a */,
+			);
+			name = Libs;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		2FBBEAD708F335360078DB84 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2C880B3B1B55597C0094B85F /* MaxV8.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		2FBBEAD608F335360078DB84 /* max-external */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2FBBEAE008F335360078DB84 /* Build configuration list for PBXNativeTarget "max-external" */;
+			buildPhases = (
+				2FBBEAD708F335360078DB84 /* Headers */,
+				2FBBEAD808F335360078DB84 /* Resources */,
+				2FBBEADA08F335360078DB84 /* Sources */,
+				2FBBEADC08F335360078DB84 /* Frameworks */,
+				2FBBEADF08F335360078DB84 /* Rez */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "max-external";
+			productName = iterator;
+			productReference = 2FBBEAE508F335360078DB84 /* v8js.mxo */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		089C1669FE841209C02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0610;
+			};
+			buildConfigurationList = 2FBBEACF08F335010078DB84 /* Build configuration list for PBXProject "v8js" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 1;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 089C166AFE841209C02AAC07 /* iterator */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				2FBBEAD608F335360078DB84 /* max-external */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		2FBBEAD808F335360078DB84 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2C880B351B554F920094B85F /* MaxV8.xcconfig in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXRezBuildPhase section */
+		2FBBEADF08F335360078DB84 /* Rez */ = {
+			isa = PBXRezBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXRezBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		2FBBEADA08F335360078DB84 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2C880B3A1B55597C0094B85F /* MaxV8.cpp in Sources */,
+				2C880B371B5557A10094B85F /* v8js.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		2FBBEAD008F335010078DB84 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Development;
+		};
+		2FBBEAD108F335010078DB84 /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Deployment;
+		};
+		2FBBEAE108F335360078DB84 /* Development */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2C880B341B554F920094B85F /* MaxV8.xcconfig */;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libstdc++";
+				COPY_PHASE_STRIP = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				HEADER_SEARCH_PATHS = (
+					"\"$(C74SUPPORT)/max-includes\"",
+					"\"$(C74SUPPORT)/msp-includes\"",
+					"\"$(C74SUPPORT)/jit-includes\"",
+					"\"$(THIRD_PARTY)/v8\"",
+				);
+				LIBRARY_SEARCH_PATHS = "$(THIRD_PARTY)/v8/out/native";
+				OTHER_LDFLAGS = "$(C74_SYM_LINKER_FLAGS)";
+			};
+			name = Development;
+		};
+		2FBBEAE208F335360078DB84 /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2C880B341B554F920094B85F /* MaxV8.xcconfig */;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libstdc++";
+				COPY_PHASE_STRIP = YES;
+				HEADER_SEARCH_PATHS = (
+					"\"$(C74SUPPORT)/max-includes\"",
+					"\"$(C74SUPPORT)/msp-includes\"",
+					"\"$(C74SUPPORT)/jit-includes\"",
+					"\"$(THIRD_PARTY)/v8\"",
+				);
+				LIBRARY_SEARCH_PATHS = "$(THIRD_PARTY)/v8/out/native";
+				OTHER_LDFLAGS = "$(C74_SYM_LINKER_FLAGS)";
+			};
+			name = Deployment;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2FBBEACF08F335010078DB84 /* Build configuration list for PBXProject "v8js" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2FBBEAD008F335010078DB84 /* Development */,
+				2FBBEAD108F335010078DB84 /* Deployment */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Development;
+		};
+		2FBBEAE008F335360078DB84 /* Build configuration list for PBXNativeTarget "max-external" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2FBBEAE108F335360078DB84 /* Development */,
+				2FBBEAE208F335360078DB84 /* Deployment */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Development;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 089C1669FE841209C02AAC07 /* Project object */;
+}

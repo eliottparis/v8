@@ -47,30 +47,32 @@ namespace cicm
         delete v8_platform;
     }
     
-    bool MaxV8::InitInstance(Isolate* isolate, long argc, t_atom* argv)
+    bool MaxV8::initInstance(Isolate* isolate, long argc, t_atom* argv)
     {
         v8::Isolate::Scope isolate_scope(isolate);
         v8::HandleScope handle_scope(isolate);
-        v8::Local<v8::Context> context = CreateMaxContext(isolate);
+        v8::Local<v8::Context> context = createMaxContext(isolate);
         m_js_context.Reset(isolate, context);
         
         if (argc > 0 && atom_gettype(argv) == A_SYM)
         {
             const char* file = atom_getsym(argv)->s_name;
             
-            Local<v8::String> script = ReadFile(file);
+            Local<v8::String> script = readFile(file);
+            m_script.Reset(isolate, script);
+            
             if (!script.IsEmpty())
             {
                 // Enter the new context so all the following operations take place within it.
                 v8::Context::Scope context_scope(context);
-                ExecuteScript(script);
+                compileAndRunScript(isolate, script);
             }
         }
         
         return true;
     }
     
-    v8::Local<v8::String> MaxV8::ReadFile(const char* filename)
+    v8::Local<v8::String> MaxV8::readFile(const char* filename)
     {
         v8::Isolate* isolate = v8::Isolate::GetCurrent();
         EscapableHandleScope handle_scope(isolate);
@@ -103,7 +105,7 @@ namespace cicm
         return handle_scope.Escape(Local<v8::String>());
     }
     
-    Local<v8::Context> MaxV8::CreateMaxContext(v8::Isolate* isolate)
+    Local<v8::Context> MaxV8::createMaxContext(v8::Isolate* isolate)
     {
         // Create a template for the global object.
         Local<v8::ObjectTemplate> global = v8::ObjectTemplate::New(isolate);
@@ -144,9 +146,9 @@ namespace cicm
         return v8::Context::New(isolate, NULL, global);
     }
     
-    Local<Value> MaxV8::ExecuteScript(v8::Handle<v8::String> script)
+    Local<Value> MaxV8::compileAndRunScript(Isolate* isolate, Local<v8::String> script)
     {
-        EscapableHandleScope handle_scope(m_isolate);
+        EscapableHandleScope handle_scope(isolate);
         
         // We're just about to compile the script; set up an error handler to
         // catch any exceptions the script might throw.
@@ -215,7 +217,9 @@ namespace cicm
             
             x->m_number_of_inlets = 1;
             
-            if (!x->InitInstance(x->m_isolate, argc, argv))
+            //x->m_outlet_assist.insert(std::pair<int, string>(0, "this is a test"));
+            
+            if (!x->initInstance(x->m_isolate, argc, argv))
             {
                 object_free(x);
                 x = nullptr;
@@ -230,7 +234,7 @@ namespace cicm
         if (x->m_text)
             sysmem_freehandle(x->m_text);
         
-        if(x->m_obj_argc > 1)
+        if(x->m_obj_argc)
         {
             delete [] x->m_obj_argv;
         }
@@ -280,10 +284,11 @@ namespace cicm
     {
         char filename[MAX_PATH_CHARS];
         short path;
-        t_fourcc type = FOUR_CHAR_CODE('JSON');
+        t_fourcc type = FOUR_CHAR_CODE('TEXT');
         
-        if (s == gensym(""))
+        if (s == gensym("") || s == gensym(x->m_filename))
         {
+            // compile and run the same file again
             filename[0] = 0;
             
             if (open_dialog(filename, &path, &type, &type, 1))
@@ -339,24 +344,21 @@ namespace cicm
     void MaxV8::Loadbang(MaxV8* x)
     {
         post("(cpp) : loadbang called");
-        CallJsFunction(x, gensym("loadbang"), 0, nullptr);
+        //CallJsFunction(x, gensym("loadbang"), 0, nullptr);
     }
     
     void MaxV8::Bang(MaxV8* x)
     {
-        post("(cpp) : bang received");
         CallJsFunction(x, gensym("bang"), 0, nullptr);
     }
     
     void MaxV8::Anything(MaxV8* x, t_symbol *s, long ac, t_atom *av)
     {
-        post("(cpp) : Anything method (%s)", s->s_name);
         CallJsFunction(x, s, ac, av);
     }
     
     void MaxV8::Int(MaxV8* x, long number)
     {
-        post("(cpp) : int received %ld", number);
         t_atom av[1];
         atom_setlong(av, number);
         CallJsFunction(x, gensym("msg_int"), 1, av);
@@ -364,11 +366,11 @@ namespace cicm
     
     void MaxV8::Float(MaxV8* x, double number)
     {
-        post("(cpp) : double received %f", (float)number);
+        post("(cpp) : double received %f", number);
         
-        t_atom av[1];
-        atom_setfloat(av, number);
-        CallJsFunction(x, gensym("msg_float"), 1, av);
+        //t_atom av;
+        //atom_setfloat(&av, number);
+        //CallJsFunction(x, gensym("msg_float"), 1, &av);
     }
     
     void MaxV8::resizeInlets(MaxV8 *x)
@@ -432,39 +434,58 @@ namespace cicm
     // v8 Handles
     //============================================================================
     
-    void MaxV8::CallJsFunction(MaxV8* x, t_symbol *s, long ac, t_atom *av)
+    Local<Value> MaxV8::CallJsFunction(MaxV8* x, t_symbol *s, long ac, t_atom *av)
     {
+        post("(cpp) function %s called", s->s_name);
         Isolate* isolate = x->m_isolate;
         HandleScope handle_scope(isolate);
-        
         Local<v8::Context> context = Local<v8::Context>::New(isolate, x->m_js_context);
-        
         Local<v8::Object> global = context->Global();
+        MaybeLocal<Value> maybe_value = global->Get(context, v8::String::NewFromUtf8(isolate, s->s_name));
         
-        MaybeLocal<Value> value = global->Get(context, v8::String::NewFromUtf8(isolate, s->s_name));
-        
-        if(!value.IsEmpty())
+        if(!maybe_value.IsEmpty())
         {
-            Local<Value> local_value = value.ToLocalChecked();
+            Local<Value> value = maybe_value.ToLocalChecked();
             
-            if (local_value->IsFunction())
+            if (value->IsFunction())
             {
-                Local<v8::Function> fn = v8::Local<v8::Function>::Cast(local_value);
+                post("(cpp) %s is function", s->s_name);
+                Local<v8::Function> fn = v8::Local<v8::Function>::Cast(value);
+                MaybeLocal<Value> result;
                 
-                Local<Value>* args = new Local<Value>[ac];
-                for(long i = 0; i < ac; i++)
+                Local<Value>* args = nullptr;
+                
+                if(ac > 0)
                 {
-                    switch (atom_gettype(av+i))
+                    args = new Local<Value>[ac];
+                    for(long i = 0; i < ac; i++)
                     {
-                        case A_LONG:  args[i] = v8::Integer::New(isolate, atom_getlong(av+i)); break;
-                        case A_FLOAT: args[i] = v8::Number::New(isolate, atom_getfloat(av+i));break;
-                        case A_SYM:   args[i] = v8::String::NewFromUtf8(isolate, atom_getsym(av+i)->s_name); break;
-                        default: break;
+                        switch (atom_gettype(av+i))
+                        {
+                            case A_LONG:  args[i] = v8::Integer::New(isolate, atom_getlong(av+i)); break;
+                            case A_FLOAT: args[i] = v8::Number::New(isolate, atom_getfloat(av+i));break;
+                            case A_SYM:   args[i] = v8::String::NewFromUtf8(isolate, atom_getsym(av+i)->s_name); break;
+                            default: break;
+                        }
                     }
                 }
-                fn->Call(context, fn, ac, args);
+                
+                result = fn->Call(context, fn, ac, args);
+                
+                if(!result.IsEmpty())
+                {
+                    //return handle_scope.Escape(result.ToLocalChecked());
+                    return result.ToLocalChecked();
+                }
+            }
+            else
+            {
+                object_error((t_object*)x, "[%s] has no function named %s", x->m_filename, s->s_name);
             }
         }
+        
+        //return handle_scope.Escape(Local<Value>());
+        return Local<Value>();
     }
     
     void MaxV8::JsArgumentsGetter(Local<String> property, const PropertyCallbackInfo<Value>& info)
@@ -662,7 +683,7 @@ namespace cicm
         //post("(c++) inlet assist %ld : %s", index, cstr);
     }
     
-    void MaxV8::JsSetOutletAssist(const FunctionCallbackInfo<Value>& args)
+    void MaxV8::JsSetOutletAssist(FunctionCallbackInfo<Value> const& args)
     {
         /*
          Isolate* isolate = args.GetIsolate();
