@@ -1,4 +1,10 @@
 #################
+## ThirdParty
+#################
+.gclient
+.gclient_entries
+
+#################
 ## Visual Studio
 #################
 
