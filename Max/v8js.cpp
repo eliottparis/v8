@@ -27,17 +27,6 @@ void ext_main(void *r)
     class_addmethod(c, (method)MaxV8::EditorClosed,     "edclose",      A_CANT,     0);
     class_addmethod(c, (method)MaxV8::EditorSaved,      "edsave",       A_CANT,     0);
     
-    post("(cpp) : test sym %s", "jojo");
-    post("(cpp) : test int %i", 42);
-    double d = 0.12;
-    float f = 55.9f;
-    post("(cpp) : test double %f", d);
-    post("(cpp) : test float %f", f);
-    
-    error("(cpp) : test sym %s", "jojo");
-    error("(cpp) : test int %i", 42);
-    error("(cpp) : test double %f", 0.888);
-    
     // global v8 init
     MaxV8::Init();
     
