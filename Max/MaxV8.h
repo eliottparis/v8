@@ -98,12 +98,11 @@ namespace cicm
         map<int, string>    m_inlet_assist;
         map<int, string>    m_outlet_assist;
         
+        bool                m_script_compiled;
         static v8::Platform *v8_platform;
         v8::Isolate*        m_isolate;
         v8::Persistent
         <v8::Context>       m_js_context;
-        v8::Persistent
-        <v8::String>        m_script;
         
         //---------------------------------------------
                 

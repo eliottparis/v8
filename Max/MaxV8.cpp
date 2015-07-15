@@ -144,7 +144,9 @@ namespace cicm
         {
             // Enter the new context so all the following operations take place within it.
             v8::Context::Scope context_scope(context);
+            x->m_script_compiled = false;
             x->compileAndRunScript(isolate, script);
+            x->m_script_compiled = true;
         }
         
         ResizeIO(x, last_ins, x->m_number_of_inlets, last_outs, x->m_number_of_outlets);
@@ -180,9 +182,7 @@ namespace cicm
                     }
                 }
             }
-            
-            
-            
+
             if(argc > 0 && atom_gettype(argv) == A_SYM)
             {
                 t_symbol* textfile = atom_getsym(argv);
@@ -390,49 +390,6 @@ namespace cicm
             }
             
             object_method(b, gensym("dynlet_end"));
-            
-            /*
-            object_method(b, gensym("dynlet_begin"));
-            
-            const long nin = inlet_count((t_object *)x);
-            
-            post("ResizeIO [%s]: nin %ld", x->m_filename, nin);
-            
-            if(nin > x->m_number_of_inlets)
-            {
-                for(long i = nin; i > x->m_number_of_inlets; i--)
-                {
-                    proxy_delete(inlet_nth((t_object*)x, i-1));
-                }
-            }
-            else if(nin < x->m_number_of_inlets)
-            {
-                for(long i = nin; i < x->m_number_of_inlets; i++)
-                {
-                    proxy_append((t_object*)x, i, &x->m_inletcount);
-                }
-            }
-            
-            const long nout = outlet_count((t_object *)x);
-            
-            if(nout > x->m_number_of_outlets)
-            {
-                for(long i = nout; i > x->m_number_of_outlets; i--)
-                {
-                    outlet_delete(outlet_nth((t_object*)x, i-1));
-                    x->m_outlets.pop_back();
-                }
-            }
-            else if(nout < x->m_number_of_outlets)
-            {
-                for(long i = nout; i < x->m_number_of_outlets; i++)
-                {
-                    x->m_outlets.push_back(outlet_append((t_object*)x, NULL, NULL));
-                }
-            }
-            
-            object_method(b, gensym("dynlet_end"));
-             */
         }
     }
     
@@ -554,13 +511,16 @@ namespace cicm
         Local<External> data = Local<External>::Cast(info.Data());
         MaxV8* x = static_cast<MaxV8*>(data->Value());
         
-        int ins = value->Int32Value();
-        if(ins < 1) ins = 1;
-        if(ins > 250) ins = 250;
-        
-        if(x->m_number_of_inlets != ins)
+        if(!x->m_script_compiled)
         {
-            x->m_number_of_inlets = ins;
+            int ins = value->Int32Value();
+            if(ins < 1) ins = 1;
+            if(ins > 250) ins = 250;
+            
+            if(x->m_number_of_inlets != ins)
+            {
+                x->m_number_of_inlets = ins;
+            }
         }
     }
     
@@ -577,13 +537,16 @@ namespace cicm
         Local<External> data = Local<External>::Cast(info.Data());
         MaxV8* x = static_cast<MaxV8*>(data->Value());
         
-        int outs = value->Int32Value();
-        if(outs < 0) outs = 0;
-        if(outs > 250) outs = 250;
-        
-        if(x->m_number_of_outlets != outs)
+        if(!x->m_script_compiled)
         {
-            x->m_number_of_outlets = outs;
+            int outs = value->Int32Value();
+            if(outs < 0) outs = 0;
+            if(outs > 250) outs = 250;
+            
+            if(x->m_number_of_outlets != outs)
+            {
+                x->m_number_of_outlets = outs;
+            }
         }
     }
     
