@@ -47,64 +47,6 @@ namespace cicm
         delete v8_platform;
     }
     
-    bool MaxV8::initInstance(Isolate* isolate, long argc, t_atom* argv)
-    {
-        v8::Isolate::Scope isolate_scope(isolate);
-        v8::HandleScope handle_scope(isolate);
-        v8::Local<v8::Context> context = createMaxContext(isolate);
-        m_js_context.Reset(isolate, context);
-        
-        if (argc > 0 && atom_gettype(argv) == A_SYM)
-        {
-            const char* file = atom_getsym(argv)->s_name;
-            
-            Local<v8::String> script = readFile(file);
-            m_script.Reset(isolate, script);
-            
-            if (!script.IsEmpty())
-            {
-                // Enter the new context so all the following operations take place within it.
-                v8::Context::Scope context_scope(context);
-                compileAndRunScript(isolate, script);
-            }
-        }
-        
-        return true;
-    }
-    
-    v8::Local<v8::String> MaxV8::readFile(const char* filename)
-    {
-        v8::Isolate* isolate = v8::Isolate::GetCurrent();
-        EscapableHandleScope handle_scope(isolate);
-        
-        t_fourcc type = FOUR_CHAR_CODE('TEXT');
-        
-        strncpy_zero(m_filename, filename, MAX_FILENAME_CHARS);
-        
-        if(locatefile_extended(m_filename, &m_path, &type, &type, 1))
-        {
-            object_error((t_object *)&obj, "can't find file %s", m_filename);
-            return handle_scope.Escape(Local<v8::String>());
-        }
-        
-        t_filehandle fh;
-        short err = path_opensysfile(m_filename, m_path, &fh, READ_PERM);
-        
-        if (!err)
-        {
-            sysfile_readtextfile(fh, m_text, 0, (t_sysfile_text_flags) (TEXT_LB_NATIVE | TEXT_NULL_TERMINATE));
-            sysfile_close(fh);
-            m_textsize = sysmem_handlesize(m_text);
-            
-            if(m_text)
-            {
-                return handle_scope.Escape(v8::String::NewFromUtf8(isolate, *m_text));
-            }
-        }
-        
-        return handle_scope.Escape(Local<v8::String>());
-    }
-    
     Local<v8::Context> MaxV8::createMaxContext(v8::Isolate* isolate)
     {
         // Create a template for the global object.
@@ -178,6 +120,36 @@ namespace cicm
         return handle_scope.Escape(result);
     }
     
+    void MaxV8::CompileAndRun(MaxV8 *x)
+    {
+        // Create a new Isolate and make it the current one.
+        ArrayBufferAllocator allocator;
+        Isolate::CreateParams create_params;
+        create_params.array_buffer_allocator = &allocator;
+        Isolate* isolate = x->m_isolate = Isolate::New(create_params);
+        
+        v8::Isolate::Scope isolate_scope(isolate);
+        v8::HandleScope handle_scope(isolate);
+        v8::Local<v8::Context> context = x->createMaxContext(isolate);
+        x->m_js_context.Reset(isolate, context);
+        
+        const long last_ins = x->m_number_of_inlets > 0 ? x->m_number_of_inlets : 1;
+        const long last_outs = x->m_number_of_outlets;
+        x->m_number_of_inlets = 1;
+        x->m_number_of_outlets = 1;
+        
+        Local<v8::String> script = v8::String::NewFromUtf8(isolate, *x->m_text);
+        
+        if (!script.IsEmpty())
+        {
+            // Enter the new context so all the following operations take place within it.
+            v8::Context::Scope context_scope(context);
+            x->compileAndRunScript(isolate, script);
+        }
+        
+        ResizeIO(x, last_ins, x->m_number_of_inlets, last_outs, x->m_number_of_outlets);
+    }
+    
     //============================================================================
     // MaxV8 Methods called by Max
     //============================================================================
@@ -209,20 +181,12 @@ namespace cicm
                 }
             }
             
-            // Create a new Isolate and make it the current one.
-            ArrayBufferAllocator allocator;
-            Isolate::CreateParams create_params;
-            create_params.array_buffer_allocator = &allocator;
-            x->m_isolate = Isolate::New(create_params);
             
-            x->m_number_of_inlets = 1;
             
-            //x->m_outlet_assist.insert(std::pair<int, string>(0, "this is a test"));
-            
-            if (!x->initInstance(x->m_isolate, argc, argv))
+            if(argc > 0 && atom_gettype(argv) == A_SYM)
             {
-                object_free(x);
-                x = nullptr;
+                t_symbol* textfile = atom_getsym(argv);
+                Read(x, textfile);
             }
         }
         
@@ -239,7 +203,7 @@ namespace cicm
             delete [] x->m_obj_argv;
         }
         
-        //x->m_js_context.Reset();
+        x->m_js_context.Reset();
         
         // need to dispose isolate but crash for now !
         //x->m_isolate->Dispose();
@@ -286,23 +250,31 @@ namespace cicm
         short path;
         t_fourcc type = FOUR_CHAR_CODE('TEXT');
         
-        if (s == gensym("") || s == gensym(x->m_filename))
+        strncpy_zero(filename, s->s_name, MAX_FILENAME_CHARS);
+        
+        if(locatefile_extended(filename, &path, &type, &type, 1))
         {
-            // compile and run the same file again
-            filename[0] = 0;
-            
-            if (open_dialog(filename, &path, &type, &type, 1))
-                return;
+            object_error((t_object *)x, "can't find file %s", filename);
+            return;
         }
-        else
+        
+        // file found, let's read it
+        
+        strncpy_zero(x->m_filename, filename, MAX_FILENAME_CHARS);
+        x->m_path = path;
+        
+        t_filehandle fh;
+        short err = path_opensysfile(x->m_filename, path, &fh, PATH_READ_PERM);
+        
+        if (!err)
         {
-            strcpy(filename, s->s_name);
+            sysfile_readtextfile(fh, x->m_text, 0, (t_sysfile_text_flags) (TEXT_LB_NATIVE | TEXT_NULL_TERMINATE));
+            sysfile_close(fh);
+            x->m_textsize = sysmem_handlesize(x->m_text);
             
-            if(locatefile_extended(filename, &path, &type, &type, 1))
-            {
-                object_error((t_object *)x, "can't find file %s", filename);
-                return;
-            }
+            // compile and run current text script :
+            
+            CompileAndRun(x);
         }
     }
     
@@ -334,16 +306,22 @@ namespace cicm
         x->m_texteditor = nullptr;
     }
     
-    long MaxV8::EditorSaved(MaxV8* *x, char **text, long size)
+    long MaxV8::EditorSaved(MaxV8* x, char **text, long size)
     {
-        post("doc saved !!");
+        if (x->m_text)
+            sysmem_freehandle(x->m_text);
+        
+        x->m_text = sysmem_newhandleclear(size+1);
+        sysmem_copyptr((char *)*text, *x->m_text, size);
+        x->m_textsize = size+1;
+        
+        CompileAndRun(x);
         
         return 0; // tell editor it can save the text
     }
     
     void MaxV8::Loadbang(MaxV8* x)
     {
-        post("(cpp) : loadbang called");
         //CallJsFunction(x, gensym("loadbang"), 0, nullptr);
     }
     
@@ -359,21 +337,19 @@ namespace cicm
     
     void MaxV8::Int(MaxV8* x, long number)
     {
-        t_atom av[1];
-        atom_setlong(av, number);
-        CallJsFunction(x, gensym("msg_int"), 1, av);
+        t_atom av;
+        atom_setlong(&av, number);
+        CallJsFunction(x, gensym("msg_int"), 1, &av);
     }
     
     void MaxV8::Float(MaxV8* x, double number)
     {
-        post("(cpp) : double received %f", number);
-        
-        //t_atom av;
-        //atom_setfloat(&av, number);
-        //CallJsFunction(x, gensym("msg_float"), 1, &av);
+        t_atom av;
+        atom_setfloat(&av, number);
+        CallJsFunction(x, gensym("msg_float"), 1, &av);
     }
     
-    void MaxV8::resizeInlets(MaxV8 *x)
+    void MaxV8::ResizeIO(MaxV8 *x, long last_ins, long new_ins, long last_outs, long new_outs)
     {
         t_object *b = NULL;
         object_obex_lookup(x, gensym("#B"), (t_object **)&b);
@@ -382,51 +358,81 @@ namespace cicm
         {
             object_method(b, gensym("dynlet_begin"));
             
-            if(inlet_count((t_object *)x) > m_number_of_inlets)
+            if(last_ins > new_ins)
             {
-                for(int i = inlet_count((t_object *)x); i > m_number_of_inlets; i--)
+                for(long i = last_ins; i > new_ins; i--)
                 {
                     proxy_delete(inlet_nth((t_object*)x, i-1));
                 }
             }
-            else if(inlet_count((t_object *)x) < m_number_of_inlets)
+            else if(last_ins < new_ins)
             {
-                for(int i = inlet_count((t_object *)x); i < m_number_of_inlets; i++)
+                for(long i = last_ins; i < new_ins; i++)
                 {
-                    proxy_append((t_object*)x, i, &m_inletcount);
+                    proxy_append((t_object*)x, i, &x->m_inletcount);
                 }
             }
             
-            object_method(b, gensym("dynlet_end"));
-        }
-    }
-    
-    void MaxV8::resizeOutlets(MaxV8 *x)
-    {
-        t_object *b = NULL;
-        object_obex_lookup(x, gensym("#B"), (t_object **)&b);
-        
-        if (b)
-        {
-            object_method(b, gensym("dynlet_begin"));
-            
-            if(outlet_count((t_object *)x) > m_number_of_outlets)
+            if(last_outs > new_outs)
             {
-                for(int i = outlet_count((t_object *)x); i > m_number_of_outlets; i--)
+                for(long i = last_outs; i > new_outs; i--)
                 {
                     outlet_delete(outlet_nth((t_object*)x, i-1));
-                    m_outlets.pop_back();
+                    x->m_outlets.pop_back();
                 }
             }
-            else if(outlet_count((t_object *)x) < m_number_of_outlets)
+            else if(last_outs < new_outs)
             {
-                for(int i = outlet_count((t_object *)x); i < m_number_of_outlets; i++)
+                for(long i = last_outs; i < new_outs; i++)
                 {
-                    m_outlets.push_back(outlet_append((t_object*)x, NULL, NULL));
+                    x->m_outlets.push_back(outlet_append((t_object*)x, NULL, NULL));
                 }
             }
             
             object_method(b, gensym("dynlet_end"));
+            
+            /*
+            object_method(b, gensym("dynlet_begin"));
+            
+            const long nin = inlet_count((t_object *)x);
+            
+            post("ResizeIO [%s]: nin %ld", x->m_filename, nin);
+            
+            if(nin > x->m_number_of_inlets)
+            {
+                for(long i = nin; i > x->m_number_of_inlets; i--)
+                {
+                    proxy_delete(inlet_nth((t_object*)x, i-1));
+                }
+            }
+            else if(nin < x->m_number_of_inlets)
+            {
+                for(long i = nin; i < x->m_number_of_inlets; i++)
+                {
+                    proxy_append((t_object*)x, i, &x->m_inletcount);
+                }
+            }
+            
+            const long nout = outlet_count((t_object *)x);
+            
+            if(nout > x->m_number_of_outlets)
+            {
+                for(long i = nout; i > x->m_number_of_outlets; i--)
+                {
+                    outlet_delete(outlet_nth((t_object*)x, i-1));
+                    x->m_outlets.pop_back();
+                }
+            }
+            else if(nout < x->m_number_of_outlets)
+            {
+                for(long i = nout; i < x->m_number_of_outlets; i++)
+                {
+                    x->m_outlets.push_back(outlet_append((t_object*)x, NULL, NULL));
+                }
+            }
+            
+            object_method(b, gensym("dynlet_end"));
+             */
         }
     }
     
@@ -436,7 +442,6 @@ namespace cicm
     
     Local<Value> MaxV8::CallJsFunction(MaxV8* x, t_symbol *s, long ac, t_atom *av)
     {
-        post("(cpp) function %s called", s->s_name);
         Isolate* isolate = x->m_isolate;
         HandleScope handle_scope(isolate);
         Local<v8::Context> context = Local<v8::Context>::New(isolate, x->m_js_context);
@@ -449,7 +454,6 @@ namespace cicm
             
             if (value->IsFunction())
             {
-                post("(cpp) %s is function", s->s_name);
                 Local<v8::Function> fn = v8::Local<v8::Function>::Cast(value);
                 MaybeLocal<Value> result;
                 
@@ -551,13 +555,12 @@ namespace cicm
         MaxV8* x = static_cast<MaxV8*>(data->Value());
         
         int ins = value->Int32Value();
-        if(ins < 0) ins = 0;
+        if(ins < 1) ins = 1;
         if(ins > 250) ins = 250;
         
         if(x->m_number_of_inlets != ins)
         {
             x->m_number_of_inlets = ins;
-            x->resizeInlets(x);
         }
     }
     
@@ -581,7 +584,6 @@ namespace cicm
         if(x->m_number_of_outlets != outs)
         {
             x->m_number_of_outlets = outs;
-            x->resizeOutlets(x);
         }
     }
     
@@ -644,6 +646,10 @@ namespace cicm
         if(argc > 1)
         {
             outlet_anything(x->m_outlets[index], gensym("list"), argc, argv);
+        }
+        else
+        {
+            //outlet_bang(x->m_outlets[index]);
         }
         
         delete [] argv;

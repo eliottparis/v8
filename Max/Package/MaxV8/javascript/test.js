@@ -5,7 +5,6 @@ outlets = 4;
 setinletassist(0, "inlet assist test");
 //setinletassist(2, "inlet assist test");
 //setoutletassist(0, "outlet assist test");
-outlet(0, "fezfzefzef");
 
 post("Math.round(8.448) = " + Math.round(8.448));
 post("Math.PI = " + Math.PI);

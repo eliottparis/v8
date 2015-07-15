@@ -7,6 +7,13 @@
 #ifndef _MAX_V8_H_
 #define _MAX_V8_H_
 
+/* @todo :
+ - clean all that code
+ - make inletassist/outletassist work
+ - implement arrayfromargs()
+ - ...
+ */
+
 extern "C"
 {
 #include "ext.h"
@@ -44,8 +51,7 @@ namespace cicm
         //! Max assist method wrapper.
         static void Assist(MaxV8* x, void* b, long m, long a, char* s);
         
-        //! read a file if specified or opens a dialog to let the user to choose a file otherwise
-        // and compile the new text file.
+        //! read a file, then if succeed compile and run script
         static void Read(MaxV8* x, t_symbol *s);
         
         //! loadbang method
@@ -70,7 +76,7 @@ namespace cicm
         static void EditorClosed(MaxV8* x, char **text, long size);
         
         //! callback method called by Max when editor has been saved
-        static long EditorSaved(MaxV8* *x, char **text, long size);
+        static long EditorSaved(MaxV8* x, char **text, long size);
         
         static t_class* obj_class;
         t_object obj;
@@ -100,31 +106,27 @@ namespace cicm
         <v8::String>        m_script;
         
         //---------------------------------------------
-        
-        bool initInstance(Isolate* isolate, long argc, t_atom* argv);
-        
+                
         static void DoRead(MaxV8* x, t_symbol *s, long argc, t_atom *argv);
         
         // Creates a new execution environment containing the Max wrapped functions.
         Local<Context> createMaxContext(Isolate* isolate);
         
-        //! Search the file in Max search path, and read the content into a v8 string.
-        Local<v8::String> readFile(const char* file);
-        
         //! Compile and run the given script
         Local<Value> compileAndRunScript(Isolate* isolate, Local<v8::String> script);
         
-        //! resize the inlets
-        void resizeInlets(MaxV8 *x);
-        //! resize the outlets
-        void resizeOutlets(MaxV8 *x);
+        //! Compile and run the current script
+        static void CompileAndRun(MaxV8 *x);
         
-        //! call a named JavaScript function with arguments
-        static Local<Value> CallJsFunction(MaxV8* x, t_symbol *s, long ac, t_atom *av);
+        //! resize the inlets and outlets
+        static void ResizeIO(MaxV8 *x, long last_ins, long new_ins, long last_outs, long new_outs);
         
         //------------------------------------------------------------------------
         // v8 static handles
         //------------------------------------------------------------------------
+        
+        //! call a named JavaScript function with arguments
+        static Local<Value> CallJsFunction(MaxV8* x, t_symbol *s, long ac, t_atom *av);
         
         static void JsInletsGetter(Local<String> property, const PropertyCallbackInfo<Value>& info);
         static void JsInletsSetter(Local<String> property, Local<Value> value, const PropertyCallbackInfo<void>& info);
