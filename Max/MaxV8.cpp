@@ -325,31 +325,31 @@ namespace cicm
     
     void MaxV8::Loadbang(MaxV8* x)
     {
-        //CallJsFunction(x, gensym("loadbang"), 0, nullptr);
+        defer((t_object *)x, (method)CallJsFunction, gensym("loadbang"), 0, NULL);
     }
     
     void MaxV8::Bang(MaxV8* x)
     {
-        CallJsFunction(x, gensym("bang"), 0, nullptr);
+        defer((t_object *)x, (method)CallJsFunction, gensym("bang"), 0, NULL);
     }
     
     void MaxV8::Anything(MaxV8* x, t_symbol *s, long ac, t_atom *av)
     {
-        CallJsFunction(x, s, ac, av);
+        defer((t_object *)x, (method)CallJsFunction, s, ac, av);
     }
     
     void MaxV8::Int(MaxV8* x, long number)
     {
         t_atom av;
         atom_setlong(&av, number);
-        CallJsFunction(x, gensym("msg_int"), 1, &av);
+        defer((t_object *)x, (method)CallJsFunction, gensym("msg_int"), 1, &av);
     }
     
     void MaxV8::Float(MaxV8* x, double number)
     {
         t_atom av;
         atom_setfloat(&av, number);
-        CallJsFunction(x, gensym("msg_float"), 1, &av);
+        defer((t_object *)x, (method)CallJsFunction, gensym("msg_float"), 1, &av);
     }
     
     void MaxV8::ResizeIO(MaxV8 *x, long last_ins, long new_ins, long last_outs, long new_outs)
