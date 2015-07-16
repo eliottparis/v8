@@ -21,8 +21,10 @@ function msg_float(f)
 
 var zozo = function()
 {
-	outlets--;
 	post("posting in zozo function !");
+	
+	post("outlets was " + outlets +" and now is " + --outlets);
+	post("outlets is now " + outlets);
 }
 
 zozo();

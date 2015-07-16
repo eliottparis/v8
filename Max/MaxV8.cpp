@@ -77,6 +77,10 @@ namespace cicm
         global->Set(v8::String::NewFromUtf8(isolate, "outlet"),
                     v8::FunctionTemplate::New(isolate, JsOutput, obj_ptr));
         
+        // Bind the global 'arrayfromargs' function to the C++ callback.
+        global->Set(v8::String::NewFromUtf8(isolate, "arrayfromargs"),
+                    v8::FunctionTemplate::New(isolate, JsArrayFromArgs, obj_ptr));
+        
         // Bind the global 'setinletassist' function to the C++ callback.
         global->Set(v8::String::NewFromUtf8(isolate, "setinletassist"),
                     v8::FunctionTemplate::New(isolate, JsSetInletAssist, obj_ptr));
@@ -161,8 +165,6 @@ namespace cicm
         
         if (x)
         {
-            object_post((t_object*)&x->obj, "new v8 instance");
-            
             x->m_text = sysmem_newhandle(0);
             x->m_textsize = 0;
             x->m_texteditor = nullptr;
@@ -182,7 +184,7 @@ namespace cicm
                     }
                 }
             }
-
+            
             if(argc > 0 && atom_gettype(argv) == A_SYM)
             {
                 t_symbol* textfile = atom_getsym(argv);
@@ -289,6 +291,7 @@ namespace cicm
             x->m_texteditor = (t_object*) object_new(CLASS_NOBOX, gensym("jed"), x, 0);
             object_method(x->m_texteditor, gensym("settext"), *x->m_text, gensym("utf-8"));
             object_method(x->m_texteditor, gensym("filename"), x->m_filename, x->m_path);
+            
             
             //object_attr_setchar(x->m_texteditor, gensym("scratch"), 1);
             //object_attr_setsym(x->m_texteditor, gensym("title"), gensym("v8 editor"));
@@ -550,6 +553,116 @@ namespace cicm
         }
     }
     
+    void MaxV8::JsArrayFromArgs(FunctionCallbackInfo<Value> const& args)
+    {
+        Isolate* isolate = args.GetIsolate();
+        Isolate::Scope isolate_scope(isolate);
+        HandleScope handle_scope(isolate);
+        
+        if (args.Length() < 1)
+        {
+            isolate->ThrowException(String::NewFromUtf8(isolate, "Bad parameters"));
+            return;
+        }
+        
+        Local<Value> arguments = args[0];
+        
+        if(arguments->IsArgumentsObject())
+        {
+            Local<Array> array = Local<Array>::Cast(arguments);
+            
+            if(!array.IsEmpty())
+            {
+                Local<Array> result = Array::New(isolate);
+                if(!result.IsEmpty())
+                {
+                    Local<Context> context = isolate->GetCurrentContext();
+                    
+                    for (uint32_t i = 0; i < array->Length(); i++)
+                    {
+                        MaybeLocal<Value> obj = array->Get(context, Integer::New(context->GetIsolate(), i));
+                        if(!obj.IsEmpty())
+                        {
+                            result->Set(context, i, obj.ToLocalChecked());
+                        }
+                    }
+                    
+                    if(!result.IsEmpty())
+                    {
+                        args.GetReturnValue().Set(result);
+                        return;
+                    }
+                }
+            }
+        }
+        
+        args.GetReturnValue().Set(Local<Array>());
+    }
+    
+    vector<t_atom> MaxV8::ValueToAtomVector(Local<Context> context, Local<Value> value)
+    {
+        Isolate::Scope isolate_scope(context->GetIsolate());
+        HandleScope handle_scope(context->GetIsolate());
+        vector<t_atom> argv;
+        
+        t_atom av;
+        if(value->IsNumber())
+        {
+            if(value->IsInt32() || value->IsUint32())
+            {
+                Maybe<int64_t> val = value->IntegerValue(context);
+                if(val.IsJust())
+                {
+                    atom_setlong(&av, val.FromJust());
+                    argv.push_back(av);
+                }
+            }
+            else
+            {
+                Maybe<double> val = value->NumberValue(context);
+                if(val.IsJust())
+                {
+                    atom_setfloat(&av, val.FromJust());
+                    argv.push_back(av);
+                }
+            }
+        }
+        else if(value->IsUndefined())
+        {
+            atom_setsym(&av, gensym("undefined"));
+            argv.push_back(av);
+        }
+        else if(value->IsNull())
+        {
+            atom_setsym(&av, gensym("null"));
+            argv.push_back(av);
+        }
+        else if(value->IsArray())
+        {
+            Local<Array> array = Local<Array>::Cast(value);
+            for (uint32_t i = 0; i < array->Length(); i++)
+            {
+                MaybeLocal<Value> obj = array->Get(context, Integer::New(context->GetIsolate(), i));
+                if(!obj.IsEmpty())
+                {
+                    vector<t_atom> temp_argv = ValueToAtomVector(context, obj.ToLocalChecked());
+                    if (!temp_argv.empty())
+                    {
+                        argv.insert(argv.end(), temp_argv.begin(), temp_argv.end());
+                    }
+                }
+            }
+        }
+        else if(value->IsString())
+        {
+            v8::String::Utf8Value str(value);
+            atom_setsym(&av, gensym(ToCString(str)));
+            argv.push_back(av);
+        }
+        
+        return argv;
+    }
+    
     void MaxV8::JsOutput(FunctionCallbackInfo<Value> const& args)
     {
         Isolate* isolate = args.GetIsolate();
@@ -558,7 +671,7 @@ namespace cicm
         
         if (args.Length() < 2)
         {
-            isolate->ThrowException(String::NewFromUtf8(isolate, "Bad parameters"));
+            isolate->ThrowException(String::NewFromUtf8(isolate, "outlet need at least 2 parameters"));
             return;
         }
         
@@ -583,39 +696,64 @@ namespace cicm
             return;
         }
         
-        short argc = 0;
-        t_atom* argv = new t_atom[args.Length() - 1];
-        for(int i = 0; i < args.Length() - 1; i++)
+        Local<Context> context = isolate->GetCurrentContext();
+        
+        vector<t_atom> argv_vec;
+        
+        for(int i = 1; i < args.Length(); i++)
         {
-            Local<Value> arg = args[i+1];
-            
-            if(arg->IsNumber())
+            vector<t_atom> temp_argv = ValueToAtomVector(context, args[i]);
+            if (!temp_argv.empty())
             {
-                Maybe<double> val = arg->NumberValue(isolate->GetCurrentContext());
-                if(val.IsJust())
-                {
-                    atom_setfloat(argv+argc, val.FromJust());
-                    argc++;
-                }
-            }
-            else if(arg->IsString())
-            {
-                v8::String::Utf8Value str(arg);
-                atom_setsym(argv+argc, gensym(ToCString(str)));
-                argc++;
+                argv_vec.insert(argv_vec.end(), temp_argv.begin(), temp_argv.end());
             }
         }
+        
+        const short argc = argv_vec.size();
         
         if(argc > 1)
         {
-            outlet_anything(x->m_outlets[index], gensym("list"), argc, argv);
+            if (atom_gettype(&argv_vec[0]) == A_SYM)
+            {
+                t_atom* argv = new t_atom[argc-1];
+                
+                t_symbol* sym = atom_getsym(&argv_vec[0]);
+                
+                for(short i = 1; i < argc; i++)
+                {
+                    argv[i-1] = argv_vec[i];
+                }
+                
+                outlet_anything(x->m_outlets[index], sym, argc-1, argv);
+                delete argv;
+            }
+            else
+            {
+                t_atom* argv = new t_atom[argc];
+                
+                for(short i = 0; i < argc; i++)
+                {
+                    argv[i] = argv_vec[i];
+                }
+                
+                outlet_list(x->m_outlets[index], 0L, argc, argv);
+                delete argv;
+            }
         }
         else
         {
-            //outlet_bang(x->m_outlets[index]);
+            if(argc == 1)
+            {
+                t_atom argv = argv_vec[0];
+                switch (atom_gettype(&argv))
+                {
+                    case A_LONG:    outlet_int(x->m_outlets[index], atom_getlong(&argv)); break;
+                    case A_FLOAT:   outlet_float(x->m_outlets[index], atom_getfloat(&argv)); break;
+                    case A_SYM:     outlet_anything(x->m_outlets[index], atom_getsym(&argv), 0, NULL); break;
+                    default: break;
+                }
+            }
         }
-        
-        delete [] argv;
     }
     
     void MaxV8::JsSetInletAssist(FunctionCallbackInfo<Value> const& args)

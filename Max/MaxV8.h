@@ -10,7 +10,9 @@
 /* @todo :
  - clean all that code
  - make inletassist/outletassist work
- - implement arrayfromargs()
+ - implement messagename
+ - support arrayfromargs(messagename, arguments)
+ - call anything or list if defined
  - ...
  */
 
@@ -142,6 +144,11 @@ namespace cicm
         
         //! JavaScript 'outlet' function wrapper.
         static void JsOutput(FunctionCallbackInfo<Value> const& args);
+        
+        //! JavaScript 'outlet' function wrapper.
+        static void JsArrayFromArgs(FunctionCallbackInfo<Value> const& args);
+        
+        static vector<t_atom> ValueToAtomVector(Local<Context> context, Local<Value> value);
         
         //! @internal Extracts a C string from a V8 Utf8Value.
         static const char* ToCString(String::Utf8Value const& value);

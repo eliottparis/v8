@@ -12,7 +12,7 @@ if(jsarguments.lenght > 1 && !isNaN(parseFloat(jsarguments[1])))
 
 function bang()
 {
-	outlet(0, leftval + rightval);
+	outlet(0, leftval - rightval);
 }
 
 function msg_float(value)
