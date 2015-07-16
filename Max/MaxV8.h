@@ -13,6 +13,7 @@
  - implement messagename
  - support arrayfromargs(messagename, arguments)
  - call anything or list if defined
+ - handle error with line
  - ...
  */
 

@@ -248,6 +248,11 @@ namespace cicm
     
     void MaxV8::DoRead(MaxV8* x, t_symbol *s, long argc, t_atom *argv)
     {
+        if (s == gensym(""))
+        {
+            s = gensym(x->m_filename);
+        }
+        
         char filename[MAX_PATH_CHARS];
         short path;
         t_fourcc type = FOUR_CHAR_CODE('TEXT');
@@ -402,6 +407,11 @@ namespace cicm
     
     Local<Value> MaxV8::CallJsFunction(MaxV8* x, t_symbol *s, long ac, t_atom *av)
     {
+        if (!x->m_script_compiled)
+        {
+            return Local<Value>();
+        }
+        
         Isolate* isolate = x->m_isolate;
         HandleScope handle_scope(isolate);
         Local<v8::Context> context = Local<v8::Context>::New(isolate, x->m_js_context);
@@ -427,7 +437,7 @@ namespace cicm
                         switch (atom_gettype(av+i))
                         {
                             case A_LONG:  args[i] = v8::Integer::New(isolate, atom_getlong(av+i)); break;
-                            case A_FLOAT: args[i] = v8::Number::New(isolate, atom_getfloat(av+i));break;
+                            case A_FLOAT: args[i] = v8::Number::New(isolate, atom_getfloat(av+i)); break;
                             case A_SYM:   args[i] = v8::String::NewFromUtf8(isolate, atom_getsym(av+i)->s_name); break;
                             default: break;
                         }
@@ -436,19 +446,29 @@ namespace cicm
                 
                 result = fn->Call(context, fn, ac, args);
                 
+                if (args)
+                {
+                    delete args;
+                }
+                
                 if(!result.IsEmpty())
                 {
-                    //return handle_scope.Escape(result.ToLocalChecked());
                     return result.ToLocalChecked();
                 }
             }
             else
             {
-                object_error((t_object*)x, "[%s] has no function named %s", x->m_filename, s->s_name);
+                if(s == gensym("loadbang"))
+                {
+                    ; // error is obstrusive here
+                }
+                else
+                {
+                    object_error((t_object*)x, "[%s] has no function named %s", x->m_filename, s->s_name);
+                }
             }
         }
         
-        //return handle_scope.Escape(Local<Value>());
         return Local<Value>();
     }
     
