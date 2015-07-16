@@ -52,12 +52,17 @@ function out_list()
 	outlet(0, "toasty", 0.8, 42, "toto", "jojo zaza");
 }
 
+function out_jsargs()
+{
+	outlet(0, jsarguments.length + " args : ", jsarguments);
+}
+
 function out_regexp()
 {
 	var re = /(\w+)\s(\w+)/;
-	var chaine = 'Alain Dupont';
-	var nouvelleChaine = chaine.replace(re, '$2, $1');
-	outlet(0, nouvelleChaine);
+	var str = 'Alain Dupont';
+	var newstr = str.replace(re, '$2, $1');
+	outlet(0, newstr);
 }
 
 function out_undefined()

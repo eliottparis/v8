@@ -38,13 +38,25 @@
 		"subpatcher_template" : "",
 		"boxes" : [ 			{
 				"box" : 				{
+					"id" : "obj-9",
+					"maxclass" : "message",
+					"numinlets" : 2,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 491.5, 174.0, 74.0, 23.0 ],
+					"style" : "",
+					"text" : "out_jsargs"
+				}
+
+			}
+, 			{
+				"box" : 				{
 					"id" : "obj-8",
 					"maxclass" : "message",
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 446.5, 129.0, 112.0, 23.0 ],
-					"presentation_rect" : [ 446.5, 129.0, 0.0, 0.0 ],
 					"style" : "",
 					"text" : "out_arrayofarray"
 				}
@@ -142,26 +154,28 @@
 , 			{
 				"box" : 				{
 					"id" : "obj-11",
+					"linecount" : 2,
 					"maxclass" : "message",
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 81.0, 358.0, 134.0, 23.0 ],
+					"patching_rect" : [ 81.0, 358.0, 134.0, 38.0 ],
 					"style" : "",
-					"text" : "\"Dupont, Alain\""
+					"text" : "\"undefined args : \" v8_out.js 1 2 3.14"
 				}
 
 			}
 , 			{
 				"box" : 				{
 					"id" : "obj-10",
+					"linecount" : 2,
 					"maxclass" : "message",
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 311.5, 358.0, 134.0, 23.0 ],
+					"patching_rect" : [ 311.5, 358.0, 134.0, 38.0 ],
 					"style" : "",
-					"text" : "\"Dupont, Alain\""
+					"text" : "\"undefined args : \" v8_out.js 1 2 3.14"
 				}
 
 			}
@@ -172,14 +186,14 @@
 					"numinlets" : 1,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 283.5, 313.0, 82.0, 23.0 ],
+					"patching_rect" : [ 283.5, 313.0, 137.0, 23.0 ],
 					"saved_object_attributes" : 					{
 						"filename" : "v8_out.js",
 						"parameter_enable" : 0
 					}
 ,
 					"style" : "",
-					"text" : "js v8_out.js"
+					"text" : "js v8_out.js 1 2 3.14"
 				}
 
 			}
@@ -246,9 +260,9 @@
 					"numinlets" : 1,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 53.0, 313.0, 97.0, 23.0 ],
+					"patching_rect" : [ 53.0, 313.0, 152.0, 23.0 ],
 					"style" : "",
-					"text" : "v8js v8_out.js"
+					"text" : "v8js v8_out.js 1 2 3.14"
 				}
 
 			}
@@ -466,6 +480,24 @@
 					"disabled" : 0,
 					"hidden" : 0,
 					"source" : [ "obj-8", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-4", 0 ],
+					"disabled" : 0,
+					"hidden" : 0,
+					"source" : [ "obj-9", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-6", 0 ],
+					"disabled" : 0,
+					"hidden" : 0,
+					"source" : [ "obj-9", 0 ]
 				}
 
 			}
