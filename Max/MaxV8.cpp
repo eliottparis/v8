@@ -684,7 +684,7 @@ namespace cicm
         if(may_num.IsJust())
         {
             index = may_num.FromJust();
-            if (index < 0 || index >= x->m_number_of_inlets)
+            if (index < 0 || index >= x->m_number_of_outlets)
             {
                 isolate->ThrowException(String::NewFromUtf8(isolate, "Bad index"));
                 return;
