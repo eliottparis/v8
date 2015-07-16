@@ -57,6 +57,11 @@ function out_jsargs()
 	outlet(0, jsarguments.length + " args : ", jsarguments);
 }
 
+function out_messagename()
+{
+	outlet(0, messagename);
+}
+
 function out_regexp()
 {
 	var re = /(\w+)\s(\w+)/;
